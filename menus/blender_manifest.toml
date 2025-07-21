@@ -1,0 +1,28 @@
+schema_version = "1.0.0"
+
+id = "dh_toolkit"
+version = "1.2.0"
+name = "DH Toolkit"
+tagline = "Darren's collection of workflow tools"
+maintainer = "Darren Hing <darren.hing77@gmail.com>"
+type = "add-on"
+
+# Blender compatibility 
+blender_version_min = "4.5.0"
+
+# License (required to be GPL for official platform)
+license = ["GPL-3.0-or-later"]
+
+# Optional but recommended
+description = """
+DH Tools collection including project management, FBX export tools, 
+multires utilities, mask extraction, and workflow optimizations.
+"""
+
+# If you need internet access for any operators
+# [permissions]
+# network = "Access online content for texture downloads"
+# files = "Read/write project files and exports"
+
+# Tags for discoverability
+tags = ["Workflow", "Export", "Project Management", "Sculpting"]
