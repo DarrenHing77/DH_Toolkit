@@ -37,6 +37,7 @@ def register_keymap():
         ("Weight Paint", "EMPTY", "DH_MT_Weight_Paint_Menu"),
         ("UV Editor", "EMPTY", "DH_MT_UV_Edit_Menu"),
         ("Node Editor", "NODE_EDITOR", "DH_MT_Shader_Editor_Menu"),
+        ("Outliner", "OUTLINER", "DH_MT_Outliner_Menu"),
     ]
 
     # Register all keymaps

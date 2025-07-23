@@ -17,6 +17,9 @@ from .project_manager import (
     DH_PM_AddFolder,
     DH_PM_AddSubfolder,
     DH_PM_RemoveFolder,
+    DH_PM_ToggleFolder,
+    DH_PM_AddFolderAt,
+    DH_PM_EditFolder,
 )
 from .multires_tools import (
     SetMultiresViewportLevelsMax,
@@ -25,7 +28,7 @@ from .multires_tools import (
 )
 from .modifier_tools import DH_OP_CopyModifiers, DH_OP_toggle_modifiers_visibility
 from .transform_utils import DH_OP_ResetTransforms
-from .display_utils import DH_OP_ToggleWireframe, DH_OT_ToggleVisibilityOutliner, DH_OP_toggle_lock_camera, DH_OP_SwitchToShaderEditor
+from .display_utils import DH_OP_ToggleWireframe, DH_OP_ToggleVisibilityOutliner, DH_OP_SwitchToShaderEditor
 from .utils import DH_OT_smart_hide
 from .cycle_vertex_groups import DH_OP_CycleVertexGroups
 from .shader_builder import DH_OP_BuildShader
@@ -55,8 +58,7 @@ classes = (
     DH_PM_AddSubfolder,
     DH_PM_RemoveFolder,
     DH_OP_ToggleWireframe,
-    DH_OT_ToggleVisibilityOutliner,
-    DH_OP_toggle_lock_camera,
+    DH_OP_ToggleVisibilityOutliner,
     DH_OP_SwitchToShaderEditor,
     DH_OT_smart_hide,
     DH_OP_toggle_modifiers_visibility,
@@ -70,6 +72,9 @@ classes = (
     DH_OP_AddMultires,
     DH_OP_MoveToNewCollection,
     DH_OP_SelectAllInCollection,
+    DH_PM_ToggleFolder,
+    DH_PM_AddFolderAt,
+    DH_PM_EditFolder,
     
     
     

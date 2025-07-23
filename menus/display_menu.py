@@ -13,7 +13,7 @@ def draw_display(layout, context):
     
     #icon = icons.get("icon_primitives")
     layout.operator('dh.toggle_wireframe', text='Wireframe Override')
-    layout.operator('dh.toggle_visibility_outliner', text='Unhide Outliner Selection')
+    layout.operator('dh.toggle_visibility_outliner', text='Toggle Hidden')
     layout.operator('dh.switch_to_shader_editor', text='Shader Editor')
     
     layout.separator()

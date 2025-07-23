@@ -22,61 +22,73 @@ class DH_OP_ToggleWireframe(bpy.types.Operator):
         return {'FINISHED'}
 
 
-
-
-# HIDE OUTLINER SELECTTION
-
-
-
-
-class DH_OT_ToggleVisibilityOutliner(bpy.types.Operator):
+class DH_OP_ToggleVisibilityOutliner(bpy.types.Operator):
     """Toggle Visibility for Outliner Selection"""
     bl_idname = "dh.toggle_visibility_outliner"
-    bl_label = "Toggle Visibility for Outliner Selection"
-    bl_description = "Toggle the visibility (eye icon) for selected objects in the Outliner"
+    bl_label = "Toggle Visibility"
 
     def execute(self, context):
-        # Prefer selected_ids from the passed-in context (Blender 3.6+)
-        # but fall back to bpy.context for compatibility with older versions
-        selected_ids = getattr(context, "selected_ids", None)
-        if selected_ids is None:
-            selected_ids = getattr(bpy.context, "selected_ids", None)
-
-        if not selected_ids:
-            self.report({'WARNING'}, "No objects selected in the Outliner.")
+        # Try outliner selection first
+        selected_ids = getattr(context, "selected_ids", [])
+        objects = [item for item in selected_ids if isinstance(item, bpy.types.Object)]
+        
+        # Fallback to viewport selection
+        if not objects:
+            objects = context.selected_objects
+        
+        # If still nothing selected, try to unhide stored hidden objects
+        if not objects:
+            hidden_names = context.scene.get('DH_hidden_objects', [])
+            if hidden_names:
+                objects = [bpy.data.objects.get(name) for name in hidden_names if bpy.data.objects.get(name)]
+                objects = [obj for obj in objects if obj]  # Filter out None
+                
+                if objects:
+                    # Unhide stored objects
+                    for obj in objects:
+                        obj.hide_viewport = False
+                        obj.hide_select = False
+                        obj.hide_render = False
+                        obj.hide_set(False)
+                        obj.select_set(True)
+                    
+                    # Clear the stored list
+                    del context.scene['DH_hidden_objects']
+                    
+                    self.report({'INFO'}, f"Unhid {len(objects)} stored objects.")
+                    return {'FINISHED'}
+        
+        if not objects:
+            self.report({'WARNING'}, "Nothing selected and no hidden objects stored.")
             return {'CANCELLED'}
 
-        toggled_count = 0
-
-        for item in selected_ids:
-            if isinstance(item, bpy.types.Object):  # Ensure it's an object
-                # Toggle the hide_viewport property
-                item.hide_viewport = not item.hide_viewport
-                toggled_count += 1
-
-        if toggled_count > 0:
-            self.report({'INFO'}, f"Toggled visibility for {toggled_count} object(s).")
-        else:
-            self.report({'WARNING'}, "No objects found to toggle.")
+        # Store object names before hiding
+        hiding_objects = []
+        
+        for obj in objects:
+            is_visible = not obj.hide_viewport and not obj.hide_get()
+            
+            if is_visible:
+                # Hide it and store name
+                obj.hide_viewport = True
+                hiding_objects.append(obj.name)
+            else:
+                # Show it
+                obj.hide_viewport = False
+                obj.hide_select = False
+                obj.hide_render = False
+                obj.hide_set(False)
+        
+        # Store hidden object names
+        if hiding_objects:
+            context.scene['DH_hidden_objects'] = hiding_objects
+        
+        # Force updates
+        context.view_layer.update()
+        for area in context.screen.areas:
+            area.tag_redraw()
 
         return {'FINISHED'}
-
-
-
-
-class DH_OP_toggle_lock_camera(bpy.types.Operator):
-    """Toggle Lock Camera to View"""
-    bl_idname = "dh_op.toggle_lock_camera"
-    bl_label = "Toggle Lock Camera to View"
-    
-    def execute(self, context):
-        region_3d = context.space_data.region_3d
-        region_3d.view_camera_lock = not region_3d.view_camera_lock
-        self.report({'INFO'}, f"Lock Camera to View: {'On' if region_3d.view_camera_lock else 'Off'}")
-        return {'FINISHED'}
-    
-
-
 
 ## SWITCH TO SHADER EDITOR
 

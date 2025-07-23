@@ -8,6 +8,7 @@ from .texture_paint_menu import DH_MT_Texture_Paint_Menu
 from .weight_paint_menu import DH_MT_Weight_Paint_Menu
 from .uv_edit_menu import DH_MT_UV_Edit_Menu
 from .shader_editor_menu import DH_MT_Shader_Editor_Menu
+from .outliner_menu import DH_MT_Outliner_Menu
 
 # All menu classes
 classes = (
@@ -18,6 +19,7 @@ classes = (
     DH_MT_Weight_Paint_Menu,
     DH_MT_UV_Edit_Menu,
     DH_MT_Shader_Editor_Menu,
+    DH_MT_Outliner_Menu,
 )
 
 def register_menus():
