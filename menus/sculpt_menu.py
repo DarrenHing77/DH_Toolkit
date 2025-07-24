@@ -25,28 +25,13 @@ class DH_MT_Sculpt_Menu(bpy.types.Menu):
         icons = load_icons()
         pie = self.layout.menu_pie()
 
-        # LEFT - Face Sets and Brushes
+        # LEFT - Brushes (grid) above Face Sets (not grid)
         col_left = pie.column()
-        col_left.scale_y = 1.3
-
-        # Face Sets Tools
-        face_box = col_left.box()
-        face_box.label(text='Face Sets')
-
-        row = face_box.row(align=True)
-        row.operator('sculpt.face_sets_create', text='From Masked').mode = 'MASKED'
-        row.operator('sculpt.face_sets_create', text='From Visible').mode = 'VISIBLE'
-
-        row = face_box.row(align=True)
-        row.operator('sculpt.face_sets_create', text='From Edit Selection').mode = 'SELECTION'
-        row.operator('sculpt.face_sets_init', text='Init Loose Parts').mode = 'LOOSE_PARTS'
-
-        row = face_box.row()
-        row.operator('mesh.face_set_extract', text="Extract Face Set")
-
-        # Brushes
+        
+        # Brushes - Grid layout, slightly bigger
         brush_box = col_left.box()
         brush_box.label(text='Brushes')
+        brush_box.scale_y = 1.4  # Slightly bigger
 
         grid = brush_box.grid_flow(row_major=True, columns=3, even_columns=True)
 
@@ -69,11 +54,20 @@ class DH_MT_Sculpt_Menu(bpy.types.Menu):
             op.asset_library_identifier = ""
             op.relative_asset_identifier = identifier
 
+        # Face Sets - Not grid, regular column
+        face_box = col_left.box()
+        face_box.label(text='Face Sets')
+
+        face_box.operator('sculpt.face_sets_create', text='From Masked').mode = 'MASKED'
+        face_box.operator('sculpt.face_sets_create', text='From Visible').mode = 'VISIBLE'
+        face_box.operator('sculpt.face_sets_create', text='From Edit Selection').mode = 'SELECTION'
+        face_box.operator('sculpt.face_sets_init', text='Init Loose Parts').mode = 'LOOSE_PARTS'
+        face_box.operator('sculpt.face_set_extract', text="Extract Face Set")
+
         # RIGHT - Brush Settings and Symmetry
         col_right = pie.column()
-        col_right.scale_y = 1.3
 
-        # Use existing brush panel function
+        # Brush Settings
         brush_box = col_right.box()
         brush_box.label(text="Brush Settings")
         draw_sculpt_panels(brush_box, context)
@@ -91,62 +85,55 @@ class DH_MT_Sculpt_Menu(bpy.types.Menu):
         row.operator("sculpt.symmetrize", text="+X to -X")
         row.operator("sculpt.symmetrize", text="-X to +X")
 
-        # BOTTOM - Masking and Transform Tools
+        # BOTTOM - Not grid, bigger buttons
         col_bottom = pie.column()
-        col_bottom.scale_y = 1.3
 
-        # Mask Tools
+        # Mask Tools - Grid but wider/shorter buttons
         mask_box = col_bottom.box()
         mask_box.label(text="Mask Tools")
+        mask_box.scale_y = 1.6  # Slightly bigger than brushes
 
-        row = mask_box.row(align=True)
-        row.operator("wm.tool_set_by_id", text="Box Mask").name = "builtin.box_mask"
-        row.operator("wm.tool_set_by_id", text="Lasso Mask").name = "builtin.lasso_mask"
-        row = mask_box.row(align=True)
-        row.operator("wm.tool_set_by_id", text="Polyline Mask").name = "builtin.polyline_mask"
-        row.operator("wm.tool_set_by_id", text="Lasso Mask").name = "builtin.line_mask"
+        # 2 columns for wider buttons
+        grid = mask_box.grid_flow(row_major=True, columns=2, even_columns=True)
+        grid.operator("wm.tool_set_by_id", text="Box Mask").name = "builtin.box_mask"
+        grid.operator("wm.tool_set_by_id", text="Lasso Mask").name = "builtin.lasso_mask"
+        grid.operator("wm.tool_set_by_id", text="Polyline Mask").name = "builtin.polyline_mask"
+        grid.operator("wm.tool_set_by_id", text="Line Mask").name = "builtin.line_mask"
+        grid.operator('dh.mask_extract', text="Extract Mask")
+        # Fill the last spot or leave empty
+        grid.separator()
 
-        row = mask_box.row(align=True)
-        row.operator('dh.mask_extract', text="Extract Mask")
-        row.operator('mesh.paint_mask_slice', text="Mask Slice")
+        # Trim Tools - Separate section, also grid
+        trim_box = col_bottom.box()
+        trim_box.label(text='Trim Tools')
+        trim_box.scale_y = 1.6
 
-        row = mask_box.row(align=True)
-        op = row.operator("paint.mask_flood_fill", text="Fill")
-        op.mode = 'VALUE'
-        op.value = 1.0
-        op = row.operator("paint.mask_flood_fill", text="Clear")
-        op.mode = 'VALUE'
-        op.value = 0.0
+        trim_grid = trim_box.grid_flow(row_major=True, columns=2, even_columns=True)
+        trim_grid.operator("wm.tool_set_by_id", text="Box Trim").name = "builtin.box_trim"
+        trim_grid.operator("wm.tool_set_by_id", text="Lasso Trim").name = "builtin.lasso_trim"
+        trim_grid.operator("wm.tool_set_by_id", text="Polyline Trim").name = "builtin.polyline_trim"
+        # Leave last spot empty or add another tool
+        trim_grid.separator()
 
-        # Transform Tools
+        # Transform Tools - Not grid, big buttons
         transform_box = col_bottom.box()
         transform_box.label(text='Transform')
+        transform_box.scale_y = 2.0  # Bigger buttons
 
-        row = transform_box.row(align=True)
-        row.operator("wm.tool_set_by_id", text="Move").name = "builtin.move"
-        row.operator("wm.tool_set_by_id", text="Rotate").name = "builtin.rotate"
-        row.operator("wm.tool_set_by_id", text="Scale").name = "builtin.scale"
+        transform_box.operator("wm.tool_set_by_id", text="Move").name = "builtin.move"
+        transform_box.operator("wm.tool_set_by_id", text="Rotate").name = "builtin.rotate"
+        transform_box.operator("wm.tool_set_by_id", text="Scale").name = "builtin.scale"
 
-        row = transform_box.row(align=True)
+        row = transform_box.row()
         row.prop(context.scene.tool_settings, "transform_pivot_point", text="Pivot")
 
-        # TOP - Use your existing modifiers/multires function
+        # TOP - Modifiers/Multires
         col_top = pie.column()
-        col_top.scale_y = 1.3
-
-        # Dyntopo
-        dyntopo_box = col_top.box()
-        dyntopo_box.label(text='Dynamic Topology')
-
-        if context.sculpt_object:
-            dyntopo_enabled = context.sculpt_object.use_dynamic_topology_sculpting
-            dyntopo_box.operator("sculpt.dynamic_topology_toggle",
-                                 text="Disable Dyntopo" if dyntopo_enabled else "Enable Dyntopo")
-
-            if dyntopo_enabled and hasattr(context.tool_settings.sculpt, "detail_type_method"):
-                dyntopo_box.prop(context.tool_settings.sculpt, "detail_type_method", text="")
-                dyntopo_box.operator("sculpt.detail_flood_fill", text="Detail Flood Fill")
-
-        # Use your existing modifiers/multires menu function
         modifiers_box = col_top.box()
         draw_modifiers_multires_menu(modifiers_box, context)
+
+        # Empty corners to avoid overlap
+        pie.column()  # BOTTOM-LEFT
+        pie.column()  # BOTTOM-RIGHT  
+        pie.column()  # TOP-LEFT
+        pie.column()  # TOP-RIGHT
