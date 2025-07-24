@@ -18,9 +18,9 @@ def draw_modifiers_multires_menu(layout, context):
     
     
     layout.operator('dh.multires_level_modal', text="Adjust Level (Modal)", icon='DRIVER')
-    icon = icons.get("icon_subdcube")
+    icon = icons.get("icon_max")
     layout.operator('dh.set_multires_viewport_max', text="Set Multires Max",icon_value=icon.icon_id)
-    icon = icons.get("icon_cube")
+    icon = icons.get("icon_min")
     layout.operator('dh.set_multires_viewport_zero', text="Set Multires Min",icon_value=icon.icon_id)
     layout.operator('dh.apply_multires_base', text="Apply Base")
     layout.separator()

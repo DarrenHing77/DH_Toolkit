@@ -39,6 +39,8 @@ def load_icons():
                 ("icon_switcharrow", "switchArrow.png"),
                 ("icon_camera", "camera.png"),
                 ("icon_disk", "disk.png"),
+                ("icon_max", "max.png"),
+                ("icon_min", "min.png"),
             ]
             
             for icon_name, filename in icon_files:

@@ -102,6 +102,9 @@ class DH_MT_Sculpt_Menu(bpy.types.Menu):
         row = mask_box.row(align=True)
         row.operator("wm.tool_set_by_id", text="Box Mask").name = "builtin.box_mask"
         row.operator("wm.tool_set_by_id", text="Lasso Mask").name = "builtin.lasso_mask"
+        row = mask_box.row(align=True)
+        row.operator("wm.tool_set_by_id", text="Polyline Mask").name = "builtin.polyline_mask"
+        row.operator("wm.tool_set_by_id", text="Lasso Mask").name = "builtin.line_mask"
 
         row = mask_box.row(align=True)
         row.operator('dh.mask_extract', text="Extract Mask")
