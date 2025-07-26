@@ -1,4 +1,46 @@
 import bpy
+import rna_keymap_ui
+
+import bpy
+import rna_keymap_ui
+
+# Static list of common key types - no callback bullshit needed
+COMMON_KEY_TYPES = [
+    # Letters A-Z
+    ('A', 'A', ''), ('B', 'B', ''), ('C', 'C', ''), ('D', 'D', ''), ('E', 'E', ''),
+    ('F', 'F', ''), ('G', 'G', ''), ('H', 'H', ''), ('I', 'I', ''), ('J', 'J', ''),
+    ('K', 'K', ''), ('L', 'L', ''), ('M', 'M', ''), ('N', 'N', ''), ('O', 'O', ''),
+    ('P', 'P', ''), ('Q', 'Q', ''), ('R', 'R', ''), ('S', 'S', ''), ('T', 'T', ''),
+    ('U', 'U', ''), ('V', 'V', ''), ('W', 'W', ''), ('X', 'X', ''), ('Y', 'Y', ''), ('Z', 'Z', ''),
+    
+    # Numbers 0-9
+    ('ZERO', '0', ''), ('ONE', '1', ''), ('TWO', '2', ''), ('THREE', '3', ''), ('FOUR', '4', ''),
+    ('FIVE', '5', ''), ('SIX', '6', ''), ('SEVEN', '7', ''), ('EIGHT', '8', ''), ('NINE', '9', ''),
+    
+    # Function keys
+    ('F1', 'F1', ''), ('F2', 'F2', ''), ('F3', 'F3', ''), ('F4', 'F4', ''), ('F5', 'F5', ''),
+    ('F6', 'F6', ''), ('F7', 'F7', ''), ('F8', 'F8', ''), ('F9', 'F9', ''), ('F10', 'F10', ''),
+    ('F11', 'F11', ''), ('F12', 'F12', ''),
+    
+    # Common keys
+    ('SPACE', 'Space', ''), ('TAB', 'Tab', ''), ('ESC', 'Escape', ''), ('RET', 'Enter', ''),
+    ('BACK_SPACE', 'Backspace', ''), ('DEL', 'Delete', ''),
+    
+    # Arrow keys
+    ('LEFT_ARROW', 'Left Arrow', ''), ('RIGHT_ARROW', 'Right Arrow', ''),
+    ('UP_ARROW', 'Up Arrow', ''), ('DOWN_ARROW', 'Down Arrow', ''),
+    
+    # Mouse buttons
+    ('LEFTMOUSE', 'Left Mouse', ''), ('RIGHTMOUSE', 'Right Mouse', ''), 
+    ('MIDDLEMOUSE', 'Middle Mouse', ''), ('BUTTON4MOUSE', 'Mouse Button 4', ''),
+    ('BUTTON5MOUSE', 'Mouse Button 5', ''),
+    
+    # Symbols
+    ('COMMA', 'Comma', ''), ('PERIOD', 'Period', ''), ('SLASH', 'Slash', ''),
+    ('BACK_SLASH', 'Backslash', ''), ('MINUS', 'Minus', ''), ('EQUAL', 'Equal', ''),
+    ('LEFT_BRACKET', '[', ''), ('RIGHT_BRACKET', ']', ''), ('SEMI_COLON', 'Semicolon', ''),
+    ('QUOTE', 'Quote', ''), ('ACCENT_GRAVE', 'Grave Accent', ''),
+]
 
 class DH_ToolkitPreferences(bpy.types.AddonPreferences):
     bl_idname = "DH_Toolkit"
@@ -9,6 +51,36 @@ class DH_ToolkitPreferences(bpy.types.AddonPreferences):
         description="Base path for new projects and unsaved scenes",
         subtype='DIR_PATH',
         default=""
+    )
+
+    # KEYMAP SETTINGS - The shit that actually works
+    keymap_key: bpy.props.EnumProperty(
+        name="Key",
+        description="Main key for DH Toolkit pie menus",
+        items=COMMON_KEY_TYPES,
+        default='X',
+        update=lambda self, context: self.update_keymaps(context)
+    )
+    
+    keymap_shift: bpy.props.BoolProperty(
+        name="Shift",
+        description="Use Shift modifier",
+        default=True,
+        update=lambda self, context: self.update_keymaps(context)
+    )
+    
+    keymap_ctrl: bpy.props.BoolProperty(
+        name="Ctrl", 
+        description="Use Ctrl modifier",
+        default=False,
+        update=lambda self, context: self.update_keymaps(context)
+    )
+    
+    keymap_alt: bpy.props.BoolProperty(
+        name="Alt",
+        description="Use Alt modifier", 
+        default=False,
+        update=lambda self, context: self.update_keymaps(context)
     )
 
     # Shader Builder settings
@@ -85,10 +157,35 @@ class DH_ToolkitPreferences(bpy.types.AddonPreferences):
         default=False
     )
 
+    def update_keymaps(self, context):
+        """Reload keymaps when preferences change"""
+        try:
+            from ..register.keymap import unregister_keymap, register_keymap
+            unregister_keymap()
+            register_keymap()
+            print(f"🔥 DH Toolkit: Updated keymaps to {self.get_keymap_string()}")
+        except Exception as e:
+            print(f"🔥 DH Toolkit: Failed to update keymaps: {e}")
+
+    def get_keymap_string(self):
+        """Get human-readable keymap string"""
+        modifiers = []
+        if self.keymap_ctrl:
+            modifiers.append("Ctrl")
+        if self.keymap_alt:
+            modifiers.append("Alt") 
+        if self.keymap_shift:
+            modifiers.append("Shift")
+        
+        if modifiers:
+            return f"{'+'.join(modifiers)}+{self.keymap_key}"
+        else:
+            return self.keymap_key
+
     def draw(self, context):
         layout = self.layout
         
-        # Keymap settings - the proper way
+        # Keymap settings - front and center
         self.draw_keymap_settings(layout, context)
 
         # Project settings
@@ -144,90 +241,109 @@ class DH_ToolkitPreferences(bpy.types.AddonPreferences):
         grid.prop(self, "text_overlay_error_color") 
         grid.prop(self, "text_overlay_info_color")
     
-    def find_kmi_from_idname(self, km, idname, properties=None):
-        """Find keymap item by idname and optional properties"""
-        for kmi in km.keymap_items:
-            if kmi.idname == idname:
-                if properties:
-                    match = True
-                    for prop_name, prop_value in properties:
-                        if not hasattr(kmi.properties, prop_name) or getattr(kmi.properties, prop_name) != prop_value:
-                            match = False
-                            break
-                    if match:
-                        return kmi
-                else:
-                    return kmi
-        return None
-
-    def draw_keymap_item(self, layout, kc, km, kmi, label=""):
-        """Draw individual keymap item with proper controls"""
-        split = layout.split(factor=0.3)
-        
-        # Left side - checkbox and label
-        row = split.row()
-        row.prop(kmi, "active", text="")
-        row.label(text=label)
-        
-        # Right side - keymap controls
-        split.template_keymap_item_properties(kmi)
-
     def draw_keymap_settings(self, layout, context):
-        """Draw keymap settings using Blender's built-in UI"""
+        """Draw keymap settings with proper UI"""
         box = layout.box()
-        box.label(text="Keymap Settings", icon='KEYINGSET')
+        box.label(text="🔥 DH Toolkit Keymaps", icon='KEYINGSET')
+        
+        # Current keymap display
+        current_box = box.box()
+        row = current_box.row()
+        row.label(text="Current Shortcut:", icon='EVENT_SHIFT')
+        row.label(text=self.get_keymap_string())
+        
+        # Keymap configuration
+        config_box = box.box()
+        config_box.label(text="Configure Shortcut:")
+        
+        # Key selection
+        row = config_box.row()
+        row.label(text="Key:")
+        row.prop(self, "keymap_key", text="")
+        
+        # Modifiers
+        row = config_box.row()
+        row.label(text="Modifiers:")
+        row.prop(self, "keymap_ctrl", text="Ctrl")
+        row.prop(self, "keymap_alt", text="Alt") 
+        row.prop(self, "keymap_shift", text="Shift")
+        
+        # Show existing keymap items from user keyconfig
+        self.draw_existing_keymaps(box, context)
+    
+    def draw_existing_keymaps(self, layout, context):
+        """Draw existing DH Toolkit keymaps from user keyconfig"""
+        box = layout.box()
+        box.label(text="Active Keymaps:", icon='SETTINGS')
         
         wm = context.window_manager
         kc = wm.keyconfigs.user
+        if not kc:
+            box.label(text="No user keyconfig available")
+            return
         
-    def draw_keymap_settings(self, layout, context):
-        """Draw keymap settings using Blender's built-in UI"""
-        box = layout.box()
-        box.label(text="Keymap Settings", icon='KEYINGSET')
+        found_any = False
         
-        wm = context.window_manager
-        kc = wm.keyconfigs.user
+        # Look for our operators in user keymaps
+        dh_operators = [
+            "wm.call_menu_pie",  # Our pie menus
+            "object.dh_smart_hide",  # Smart hide
+        ]
         
-        # DEBUG: Show what we actually find
-        debug_box = box.box()
-        debug_box.label(text="Debug Info:")
-        
-        found_items = []
-        for km in kc.keymaps:
-            for kmi in km.keymap_items:
-                if "DH_MT_" in str(kmi.properties.name if hasattr(kmi.properties, 'name') else '') or kmi.idname == "object.dh_smart_hide":
-                    found_items.append((km.name, kmi.idname, getattr(kmi.properties, 'name', 'N/A'), kmi.type, kmi.active))
-        
-        if found_items:
-            debug_box.label(text=f"Found {len(found_items)} DH Toolkit keymap items:")
-            for km_name, idname, menu_name, key, active in found_items:
-                debug_box.label(text=f"  {km_name}: {idname} -> {menu_name} ({key}) [{'Active' if active else 'Inactive'}]")
-        else:
-            debug_box.label(text="No DH Toolkit keymap items found!")
-            debug_box.label(text="Available keymaps:")
-            for km in list(kc.keymaps)[:10]:  # Show first 10
-                debug_box.label(text=f"  {km.name}")
-        
-        # Try to draw one keymap item if we found any
-        if found_items:
-            box.separator()
-            box.label(text="Keymap Controls:")
-            
-            # Find first item and try to draw it
-            km_name, idname, menu_name, key, active = found_items[0]
+        for km_name in ["3D View", "Mesh", "Sculpt", "Image Paint", "Weight Paint", "UV Editor", "Node Editor", "Outliner"]:
             km = kc.keymaps.get(km_name)
-            if km:
-                for kmi in km.keymap_items:
-                    if ((kmi.idname == idname and hasattr(kmi.properties, 'name') and kmi.properties.name == menu_name) or 
-                        (kmi.idname == "object.dh_smart_hide")):
-                        
-                        # Try the template
-                        split = box.split(factor=0.3)
-                        row = split.row()
-                        row.prop(kmi, "active", text="")
-                        row.label(text=f"Test: {menu_name if menu_name != 'N/A' else idname}")
-                        split.template_keymap_item_properties(kmi)
-                        break
+            if not km:
+                continue
+                
+            for kmi in km.keymap_items:
+                # Check for our pie menus
+                if (kmi.idname == "wm.call_menu_pie" and 
+                    hasattr(kmi.properties, 'name') and 
+                    kmi.properties.name.startswith("DH_MT_")):
+                    
+                    found_any = True
+                    row = box.row()
+                    row.label(text=f"{km_name}:")
+                    
+                    # Use the proper template for keymap item display
+                    sub_box = box.box()
+                    try:
+                        rna_keymap_ui.draw_kmi([], kc, km, kmi, sub_box, 0)
+                    except:
+                        # Fallback if draw_kmi fails
+                        sub_box.label(text=f"Menu: {kmi.properties.name}")
+                        sub_box.label(text=f"Key: {self.format_kmi_key(kmi)}")
+                
+                # Check for smart hide
+                elif kmi.idname == "object.dh_smart_hide":
+                    found_any = True
+                    row = box.row()
+                    row.label(text=f"{km_name}:")
+                    
+                    sub_box = box.box()
+                    try:
+                        rna_keymap_ui.draw_kmi([], kc, km, kmi, sub_box, 0)
+                    except:
+                        sub_box.label(text="Smart Hide")
+                        sub_box.label(text=f"Key: {self.format_kmi_key(kmi)}")
+        
+        if not found_any:
+            box.label(text="No DH Toolkit keymaps found. Try disabling/enabling the addon.")
+    
+    def format_kmi_key(self, kmi):
+        """Format keymap item key for display"""
+        modifiers = []
+        if kmi.ctrl:
+            modifiers.append("Ctrl")
+        if kmi.alt:
+            modifiers.append("Alt")
+        if kmi.shift:
+            modifiers.append("Shift")
+        
+        key_str = kmi.type
+        if modifiers:
+            return f"{'+'.join(modifiers)}+{key_str}"
+        return key_str
 
 def register_preferences():
     bpy.utils.register_class(DH_ToolkitPreferences)

@@ -3,18 +3,40 @@ import bpy
 # Store all keymap items for cleanup
 addon_keymaps = []
 
+def get_keymap_settings():
+    """Get keymap settings from addon preferences"""
+    try:
+        prefs = bpy.context.preferences.addons["DH_Toolkit"].preferences
+        return {
+            'key': prefs.keymap_key,
+            'shift': prefs.keymap_shift,
+            'alt': prefs.keymap_alt,
+            'ctrl': prefs.keymap_ctrl
+        }
+    except:
+        # Fallback to defaults if preferences not available
+        return {
+            'key': 'X',
+            'shift': True,
+            'alt': False,
+            'ctrl': False
+        }
+
 def register_keymap():
-    """Register all keymaps with default settings"""
+    """Register all keymaps with settings from preferences"""
     wm = bpy.context.window_manager
     kc = wm.keyconfigs.addon
     if not kc:
         return
 
-    # Default key settings (Shift+X)
-    key = 'X'
-    shift = True
-    alt = False
-    ctrl = False
+    # Get key settings from preferences
+    settings = get_keymap_settings()
+    key = settings['key']
+    shift = settings['shift'] 
+    alt = settings['alt']
+    ctrl = settings['ctrl']
+
+    print(f"🔥 DH Toolkit: Registering keymaps with {key} + modifiers: Ctrl={ctrl}, Alt={alt}, Shift={shift}")
 
     # Define all pie menu keymaps
     keymap_configs = [
@@ -82,3 +104,4 @@ def unregister_keymap():
         except:
             pass
     addon_keymaps.clear()
+    print("🔥 DH Toolkit: Unregistered all keymaps")

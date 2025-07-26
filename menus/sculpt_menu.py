@@ -99,7 +99,7 @@ class DH_MT_Sculpt_Menu(bpy.types.Menu):
         grid.operator("wm.tool_set_by_id", text="Lasso Mask").name = "builtin.lasso_mask"
         grid.operator("wm.tool_set_by_id", text="Polyline Mask").name = "builtin.polyline_mask"
         grid.operator("wm.tool_set_by_id", text="Line Mask").name = "builtin.line_mask"
-        grid.operator('dh.mask_extract', text="Extract Mask")
+        grid.operator('dh.advanced_mask_extract', text="Extract Mask")
         # Fill the last spot or leave empty
         grid.separator()
 
